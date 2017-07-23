@@ -49,8 +49,8 @@ handler.on('pull_request', (event) => {
   const payload = event.payload;
   const action = payload.action;
   const number = payload.number;
-  const repo = payload.pull_request.repo.name;
-  const owner = payload.pull_request.repo.owner.login;
+  const repo = payload.repository.name;
+  const owner = payload.repository.owner.login;
   const url = payload.pull_request.html_url;
 
   if (config.repositories.indexOf(repo) !== -1 && action === 'opened') {
