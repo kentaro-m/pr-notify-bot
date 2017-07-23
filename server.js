@@ -5,6 +5,7 @@ import createHandler from 'github-webhook-handler';
 import config from 'config';
 import PullRequest from './pull_request';
 import { postMessage } from './slack';
+import Promise from 'bluebird';
 
 const PORT = process.env.PORT || 8080;
 const SECRET = process.env.SECRET || '';
