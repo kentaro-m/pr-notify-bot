@@ -2,7 +2,7 @@
   "host": "",
   "organization": "",
   "repositories": [
-    ""
+    "unleash-sample"
   ],
   "reviewers": [
     "kentaro-m"
@@ -11,7 +11,7 @@
     "+1",
     "LGTM"
   ],
-  "numApprovers": 2,
+  "numApprovers": 1,
   "slackUsers": [
     {
       "kentaro-m": "kentaro"
@@ -19,6 +19,6 @@
   ],
   "message": {
     "requestReview": "Please review this pull request.",
-    "ableToMerge": ""
+    "ableToMerge": "Able to merge this pull request."
   }
 }
