@@ -1,0 +1,28 @@
+{
+  "name": "pr-bot",
+  "version": "0.0.1",
+  "main": "server.js",
+  "author": "Kentaro Matsushita",
+  "license": "MIT",
+  "scripts": {
+    "start": "babel-node ./server.js"
+  },
+  "dependencies": {
+    "@slack/client": "^3.10.0",
+    "bluebird": "^3.5.0",
+    "config": "^1.26.1",
+    "github": "^9.2.0",
+    "github-webhook-handler": "^0.6.0",
+    "babel-cli": "^6.24.1",
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb-base": "^11.1.3",
+    "eslint-plugin-import": "^2.2.0"
+  }
+}

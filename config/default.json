@@ -1,0 +1,24 @@
+{
+  "host": "",
+  "organization": "",
+  "repositories": [
+    ""
+  ],
+  "reviewers": [
+    "kentaro-m"
+  ],
+  "approveComments": [
+    "+1",
+    "LGTM"
+  ],
+  "numApprovers": 2,
+  "slackUsers": [
+    {
+      "kentaro-m": "kentaro"
+    }
+  ],
+  "message": {
+    "requestReview": "Please review this pull request.",
+    "ableToMerge": ""
+  }
+}
