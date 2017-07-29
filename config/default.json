@@ -1,24 +1,29 @@
 {
   "host": "",
+  "pathPrefix": "",
   "organization": "",
   "repositories": [
     "unleash-sample"
   ],
   "reviewers": [
-    "kentaro-m"
+    "matsushita-kentaro"
   ],
   "approveComments": [
     "+1",
     "LGTM"
   ],
   "numApprovers": 1,
-  "slackUsers": [
-    {
-      "kentaro-m": "kentaro"
-    }
-  ],
+  "slackUsers": {
+    "matsushita-kentaro": "kentaro",
+    "kentaro-m": "kentaro"
+  },
   "message": {
     "requestReview": "Please review this pull request.",
-    "ableToMerge": "Able to merge this pull request."
-  }
+    "ableToMerge": "Able to merge this pull request.",
+    "mentionComment": "Please check this review comment."
+  },
+  "assignReviewers": true,
+  "requestReview": true,
+  "ableToMerge": true,
+  "mentionComment": true
 }

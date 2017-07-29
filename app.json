@@ -1,0 +1,20 @@
+{
+  "name": "pr-notify-bot",
+  "description": "A bot that remind reviewers to review their pull requests.",
+  "repository": "https://github.com/kentaro-m/pr-notify-bot",
+  "keywords": ["node", "slack", "github", "bot"],
+  "env": {
+    "GITHUB_API_TOKEN": {
+      "description": "A token for obtaining information on pull requests.",
+      "value": ""
+    },
+    "SLACK_API_TOKEN": {
+      "description": "A token for sending messages to Slack.",
+      "value": ""
+    },
+    "SECRET_TOKEN": {
+      "description": "A token for securing webhook.",
+      "value": ""
+    }
+  }
+}

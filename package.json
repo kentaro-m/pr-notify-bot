@@ -1,5 +1,5 @@
 {
-  "name": "pr-bot",
+  "name": "pr-notify-bot",
   "version": "0.0.1",
   "main": "server.js",
   "author": "Kentaro Matsushita",
