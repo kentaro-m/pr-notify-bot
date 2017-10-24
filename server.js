@@ -54,7 +54,7 @@ handler.on('error', (err) => {
 handler.on('pull_request', async (event) => {
   try {
     const payload = event.payload;
-    console.log(payload);
+    console.log(JSON.stringify(payload));
     const action = payload.action;
     const number = payload.number;
     const repo = payload.repository.name;
