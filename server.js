@@ -8,9 +8,9 @@ import PullRequest from './lib/pull_request';
 import Slack from './lib/slack';
 
 const PORT = process.env.PORT || 8080;
-const SECRET_TOKEN = process.env.SECRET_TOKEN || '';
-const GITHUB_API_TOKEN = process.env.GITHUB_API_TOKEN || '';
-const SLACK_API_TOKEN = process.env.SLACK_API_TOKEN || '';
+const SECRET_TOKEN = process.env.SECRET_TOKEN || 'secret token';
+const GITHUB_API_TOKEN = process.env.GITHUB_API_TOKEN || 'github api token';
+const SLACK_API_TOKEN = process.env.SLACK_API_TOKEN || 'slack api token';
 
 const options = {
   debug: true,
@@ -33,28 +33,9 @@ if (config.pathPrefix) {
   options.pathPrefix = config.pathPrefix;
 }
 
-export const handler = createHandler({
-  path: '/',
-  secret: SECRET_TOKEN,
-});
-
-http.createServer((req, res) => {
-  handler(req, res, () => {
-    res.statusCode = 404;
-    res.end('no such location');
-  });
-}).listen(PORT);
-
-console.log(`Server running at Port ${PORT}`);
-
-handler.on('error', (err) => {
-  console.error('Error:', err.message);
-});
-
-handler.on('pull_request', async (event) => {
+export async function handlePullRequest(event) {
   try {
     const payload = event.payload;
-    console.log(JSON.stringify(payload));
     const action = payload.action;
     const number = payload.number;
     const repo = payload.repository.name;
@@ -83,13 +64,14 @@ handler.on('pull_request', async (event) => {
           await slack.postMessage(config.slackUsers[`${reviewer}`], message);
         });
       }
+      return;
     }
   } catch (error) {
-    console.log(error);
+    throw new Error(error.message);
   }
-});
+}
 
-handler.on('pull_request_review', async (event) => {
+export async function handlePullRequestReview(event) {
   try {
     const payload = event.payload;
     const number = payload.pull_request.number;
@@ -119,7 +101,34 @@ handler.on('pull_request_review', async (event) => {
         });
       }
     }
+    return;
   } catch (error) {
-    console.log(error);
+    throw new Error(error.message);
   }
+}
+
+const handler = createHandler({
+  path: '/',
+  secret: SECRET_TOKEN,
+});
+
+export const server = http.createServer((req, res) => {
+  handler(req, res, () => {
+    res.statusCode = 404;
+    res.end('no such location');
+  });
+}).listen(PORT);
+
+console.log(`Server running at Port ${PORT}`);
+
+handler.on('error', (err) => {
+  console.error('Error:', err.message);
+});
+
+handler.on('pull_request', (event) => {
+  handlePullRequest(event);
+});
+
+handler.on('pull_request_review', (event) => {
+  handlePullRequestReview(event);
 });
