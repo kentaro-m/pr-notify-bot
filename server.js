@@ -8,9 +8,9 @@ import PullRequest from './lib/pull_request';
 import Slack from './lib/slack';
 
 const PORT = process.env.PORT || 8080;
-const SECRET_TOKEN = process.env.SECRET_TOKEN || '';
-const GITHUB_API_TOKEN = process.env.GITHUB_API_TOKEN || '';
-const SLACK_API_TOKEN = process.env.SLACK_API_TOKEN || '';
+const SECRET_TOKEN = process.env.SECRET_TOKEN || 'secret token';
+const GITHUB_API_TOKEN = process.env.GITHUB_API_TOKEN || 'github api token';
+const SLACK_API_TOKEN = process.env.SLACK_API_TOKEN || 'slack api token';
 
 const options = {
   debug: true,
@@ -33,12 +33,86 @@ if (config.pathPrefix) {
   options.pathPrefix = config.pathPrefix;
 }
 
+export async function handlePullRequest(event) {
+  try {
+    const payload = event.payload;
+    const action = payload.action;
+    const number = payload.number;
+    const repo = payload.repository.name;
+    const owner = payload.repository.owner.login;
+    const author = payload.pull_request.user.login;
+
+    if (action === 'opened') {
+      const reviewers = config.reviewers.filter((reviewer) => {
+        return author !== reviewer;
+      });
+
+      const pr = new PullRequest(options, GITHUB_API_TOKEN);
+
+      if (config.requestReview) {
+        await pr.requestReview(owner, repo, number, reviewers);
+      }
+
+      if (config.assignReviewers) {
+        await pr.assignReviewers(owner, repo, number, reviewers);
+      }
+
+      if (config.requestReview === true || config.assignReviewers === true) {
+        const slack = new Slack(SLACK_API_TOKEN);
+        reviewers.forEach(async (reviewer) => {
+          const message = Slack.buildMessage(payload, config.message.requestReview, 'requestReview');
+          await slack.postMessage(config.slackUsers[`${reviewer}`], message);
+        });
+      }
+      return;
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function handlePullRequestReview(event) {
+  try {
+    const payload = event.payload;
+    const number = payload.pull_request.number;
+    const repo = payload.repository.name;
+    const owner = payload.repository.owner.login;
+    const user = payload.pull_request.user.login;
+
+    const slack = new Slack(SLACK_API_TOKEN);
+
+    if (config.ableToMerge) {
+      const pr = new PullRequest(options, GITHUB_API_TOKEN);
+      const reviewComments = await pr.getReviewComments(owner, repo, number);
+      const approveComments = PullRequest.getApproveComments(reviewComments, config.approveComments);
+
+      if (approveComments.length >= config.numApprovers) {
+        const message = Slack.buildMessage(payload, config.message.ableToMerge, 'ableToMerge');
+        await slack.postMessage(config.slackUsers[`${user}`], message);
+      }
+    }
+
+    if (config.mentionComment) {
+      const comment = PullRequest.parseMentionComment(payload.review.body);
+      if (comment.hasOwnProperty('mentionUsers')) {
+        comment.mentionUsers.forEach(async (mentionUser) => {
+          const message = Slack.buildMessage(payload, config.message.mentionComment, 'mentionComment');
+          await slack.postMessage(config.slackUsers[`${mentionUser}`], message);
+        });
+      }
+    }
+    return;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
 const handler = createHandler({
   path: '/',
   secret: SECRET_TOKEN,
 });
 
-http.createServer((req, res) => {
+export const server = http.createServer((req, res) => {
   handler(req, res, () => {
     res.statusCode = 404;
     res.end('no such location');
@@ -51,62 +125,10 @@ handler.on('error', (err) => {
   console.error('Error:', err.message);
 });
 
-handler.on('pull_request', async (event) => {
-  try {
-    const payload = event.payload;
-    const action = payload.action;
-    const number = payload.number;
-    const repo = payload.repository.name;
-    const owner = payload.repository.owner.login;
-    const url = payload.pull_request.html_url;
-
-    if (config.repositories.indexOf(repo) !== -1 && action === 'opened') {
-      const pr = new PullRequest(options, GITHUB_API_TOKEN);
-      await pr.requestReview(owner, repo, number, config.reviewers);
-      await pr.assignReviewers(owner, repo, number, config.reviewers);
-
-      if (config.requestReview === true || config.assignReviewers === true) {
-        const slack = new Slack(SLACK_API_TOKEN);
-        config.reviewers.forEach(async (reviewer) => {
-          await slack.postMessage(config.slackUsers[`${reviewer}`], url, config.message.requestReview);
-        });
-      }
-    }
-  } catch (error) {
-    console.log(error);
-  }
+handler.on('pull_request', (event) => {
+  handlePullRequest(event);
 });
 
-handler.on('pull_request_review', async (event) => {
-  try {
-    const payload = event.payload;
-    const number = payload.pull_request.number;
-    const repo = payload.repository.name;
-    const owner = payload.repository.owner.login;
-    const user = payload.pull_request.user.login;
-    const url = payload.pull_request.html_url;
-
-    const slack = new Slack(SLACK_API_TOKEN);
-
-    if (config.ableToMerge) {
-      const pr = new PullRequest(options, GITHUB_API_TOKEN);
-      const comments = await pr.getApproveComments(owner, repo, number, config.approveComments);
-
-      if (config.repositories.indexOf(repo) !== -1 && comments.length >= config.numApprovers) {
-        await slack.postMessage(config.slackUsers[`${user}`], url, config.message.ableToMerge);
-      }
-    }
-
-    if (config.mentionComment) {
-      const comment = PullRequest.parseMentionComment(payload.review.body, payload.review.html_url);
-
-      if (comment.hasOwnProperty('mentionUsers')) {
-        comment.mentionUsers.forEach(async (mentionUser) => {
-          await slack.postMessage(config.slackUsers[`${mentionUser}`], comment.url, config.message.mentionComment);
-        });
-      }
-    }
-  } catch (error) {
-    console.log(error);
-  }
+handler.on('pull_request_review', (event) => {
+  handlePullRequestReview(event);
 });

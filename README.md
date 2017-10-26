@@ -1,5 +1,7 @@
 # pr-notify-bot
-A bot that remind reviewers to review their pull requests.
+[![CircleCI](https://img.shields.io/circleci/project/github/kentaro-m/pr-notify-bot.svg)]()
+
+A bot that reminds reviewers to review their pull requests.
 
 ## Feature
 * Automatic addition of reviewers to pull requests
@@ -8,7 +10,7 @@ A bot that remind reviewers to review their pull requests.
   * Pull request review request is created
   * Mention comment is created on a pull request
 
-![](./pr-notify-bot.png)
+![](./demo.png)
 
 ## Usage
 ```
@@ -31,9 +33,6 @@ $ SLACK_API_TOKEN=<token> GITHUB_API_TOKEN=<token> SECRET_TOKEN=<secret> npm run
   "host": "", // Required if using GitHub Enterprise
   "pathPrefix": "", // Required if using GitHub Enterprise
   "organization": "",
-  "repositories": [ // Repositories that allows bot actions
-    "unleash-sample"
-  ],
   "reviewers": [ // Pull request reviewers (GitHub username)
     "matsushita-kentaro"
   ],
@@ -69,3 +68,6 @@ Deploy bot on Heroku.
 * **SECRET_TOKEN** A token for securing webhook
 
 Set environment variables after pressing "Deploy on Heroku" button.
+
+## License
+MIT
