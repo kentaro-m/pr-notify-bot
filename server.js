@@ -86,7 +86,7 @@ export async function handlePullRequestReview(event) {
       const reviewComments = await pr.getReviewComments(owner, repo, number);
       const approveComments = PullRequest.getApproveComments(reviewComments, config.approveComments);
 
-      if (approveComments.length >= config.numApprovers) {
+      if (approveComments.length === config.numApprovers) {
         const message = Slack.buildMessage(payload, config.message.ableToMerge, 'ableToMerge');
         await slack.postMessage(config.slackUsers[`${user}`], message);
       }
